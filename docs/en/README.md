@@ -136,7 +136,7 @@ See a typo or unclear section? Submit a PR to improve the docs!
 
 ## 📞 Support
 
-- 📖 **Documentation**: You're reading it! (or check [README.md](../README.md))
+- 📖 **Documentation**: You're reading it! (or check [README.md](../../README.md))
 - 🐛 **Bug Reports**: [GitHub Issues](https://github.com/study8677/antigravity-workspace-template/issues)
 - 💡 **Feature Requests**: [GitHub Discussions](https://github.com/study8677/antigravity-workspace-template/discussions)
 - 👥 **Community**: [Star the repo](https://github.com/study8677/antigravity-workspace-template) to stay updated
