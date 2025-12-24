@@ -1,5 +1,5 @@
 ﻿# 🪐 Plantilla de Espacio de Trabajo Google Antigravity (Edición Empresarial)
-Idiomas: [English](README.md) | [中文](README_CN.md) | [Espanol](README_ES.md)
+Idiomas: [English](README.md) | [中文](README_CN.md) | [Español](README_ES.md)
 
 ![License](https://img.shields.io/badge/License-MIT-green)
 
@@ -158,10 +158,130 @@ La IA automáticamente:
 - [x] **Fase 5: Arquitectura Cognitiva** (Despacho de Herramientas Genérico Implementado ✅)
 - [x] **Fase 6: Descubrimiento Dinámico** (Carga Automática de Herramientas y Contexto ✅)
 - [x] **Fase 7: Enjambre Multi-Agente** (Orquestación Router-Worker ✅)
-- [ ] **Fase 8: Núcleo Empresarial** (La Visión "Agent OS") - *Propuesto por [@devalexanderdaza](https://github.com/devalexanderdaza)*
-  - [ ] **Integración MCP**: Importar/Exponer servidores del Protocolo de Contexto de Modelo para conectividad universal de herramientas.
+- [x] **Fase 8: Integración MCP** (Model Context Protocol ✅) - *Implementado por [@devalexanderdaza](https://github.com/devalexanderdaza)*
+- [ ] **Fase 9: Núcleo Empresarial** (La Visión "Agent OS")
   - [ ] **Entorno Sandbox**: Ejecución segura de código (ej. E2B o Docker local) para operaciones de alto riesgo.
   - [ ] **Flujos Orquestados**: Tuberías de ejecución estructuradas y paralelas (DAGs) para tareas complejas.
+
+## 🔌 Nuevo: Integración MCP (Model Context Protocol)
+
+**Conecta cualquier servidor MCP.** El agente soporta el [Model Context Protocol](https://modelcontextprotocol.io/) para integrar herramientas y datos externos de forma transparente.
+
+### 🌐 ¿Qué es MCP?
+
+MCP estandariza cómo las apps de IA acceden a herramientas/servicios externos. Con MCP, tu agente puede:
+
+- 🔗 Conectar múltiples servidores MCP en paralelo.
+- 🛠️ Usar cualquier herramienta expuesta por esos servidores.
+- 📊 Acceder a bases de datos, APIs, sistemas de archivos, navegadores, etc.
+- 🔄 Unificar herramientas locales y remotas sin cambios en tu código.
+
+### 🚀 Configuración Rápida
+
+1. **Activa MCP en tu `.env`:**
+    ```bash
+    MCP_ENABLED=true
+    ```
+2. **Configura servidores en `mcp_servers.json`:**
+    ```json
+    {
+      "servers": [
+        {
+          "name": "github",
+          "transport": "stdio",
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-github"],
+          "enabled": true,
+          "env": {
+            "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+          }
+        }
+      ]
+    }
+    ```
+3. **Ejecuta el agente:**
+    ```bash
+    python src/agent.py
+    ```
+
+El agente automáticamente:
+- 🔌 Se conecta a los servidores MCP configurados.
+- 🔍 Descubre las herramientas disponibles.
+- 📦 Las fusiona con las herramientas locales.
+
+### 🏗️ Arquitectura
+
+```mermaid
+graph TD
+    Agent[🤖 GeminiAgent] --> LocalTools[🛠️ Herramientas Locales]
+    Agent --> MCPManager[🔌 Gestor MCP]
+    MCPManager --> Server1[📡 GitHub MCP]
+    MCPManager --> Server2[📡 Base de Datos MCP]
+    MCPManager --> Server3[📡 MCP Personalizado]
+    LocalTools --> |Combinadas| AllTools[📦 Todas las Herramientas]
+    MCPManager --> |Combinadas| AllTools
+```
+
+### 📡 Transportes Soportados
+
+| Transporte | Descripción | Caso de uso |
+|-----------|-------------|-------------|
+| `stdio` | Entrada/Salida estándar | Servidores locales, CLIs |
+| `http` | HTTP con streaming | Servidores remotos, servicios en nube |
+| `sse` | Server-Sent Events | Servidores HTTP legacy |
+
+### 🛠️ Herramientas Auxiliares MCP
+
+Incluidas en el agente para gestionar MCP:
+
+- `list_mcp_servers()` — Lista servidores conectados.
+- `list_mcp_tools()` — Enumera herramientas disponibles.
+- `get_mcp_tool_help("<tool>")` — Muestra ayuda de una herramienta MCP.
+- `mcp_health_check()` — Verifica salud de servidores.
+
+### 📋 Servidores Preconfigurados
+
+`mcp_servers.json` incluye plantillas listas para usar:
+
+- 🗂️ **Filesystem**
+- 🐙 **GitHub**
+- 🗃️ **PostgreSQL**
+- 🔍 **Brave Search**
+- 💾 **Memory**
+- 🌐 **Puppeteer**
+- 💬 **Slack**
+
+Activa los que necesites y agrega tus llaves API.
+
+### 🔧 Crear tu propio Servidor MCP
+
+Ejemplo con el [SDK Python de MCP](https://github.com/modelcontextprotocol/python-sdk) usando FastMCP:
+
+```python
+from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP("Mi Servidor Personalizado")
+
+@mcp.tool()
+def mi_herramienta(param: str) -> str:
+    """Una herramienta personalizada."""
+    return f"Procesado: {param}"
+
+if __name__ == "__main__":
+    mcp.run()
+```
+
+Regístralo en `mcp_servers.json`:
+
+```json
+{
+  "name": "mi-servidor",
+  "transport": "stdio",
+  "command": "python",
+  "args": ["ruta/a/mi_servidor.py"],
+  "enabled": true
+}
+```
 
 ## 🌐 Nuevo: LLM externo (compatible OpenAI)
 
@@ -176,12 +296,83 @@ OPENAI_MODEL=gpt-4o-mini                    # o el modelo que prefieras
 2) Herramienta: `call_openai_chat` (args: prompt, system, opcional model/temperature/max_tokens).
 3) Comportamiento: sigue el esquema estándar `/chat/completions` y devuelve el texto del primer choice o un mensaje de error.
 
-## Star History
+## 🔥 Nuevo: Carga de Herramientas y Contexto Cero-Config
 
-[![Star History Chart](https://api.star-history.com/svg?repos=study8677/antigravity-workspace-template&type=Date)](https://star-history.com/#study8677/antigravity-workspace-template&Date)
+**Sin imports manuales.** El agente descubre y carga automáticamente herramientas y conocimiento.
 
+### 🛠️ Descubrimiento Automático de Herramientas
+Coloca cualquier archivo Python en `src/tools/` y el agente lo sabrá usar de inmediato:
 
-## Star History
+```python
+# src/tools/mi_herramienta.py
+def analizar_sentimiento(texto: str) -> str:
+    """Analiza el sentimiento del texto."""
+    return "Sentimiento positivo detectado"
+```
+
+Reinicia y la herramienta estará disponible sin tocar `agent.py`.
+
+### 📚 Carga Automática de Contexto
+Agrega conocimiento a `.context/` y se inyecta automáticamente:
+
+```bash
+echo "# Reglas del Proyecto
+Usa lenguaje claro." > .context/reglas_proyecto.md
+```
+
+El agente seguirá estas reglas en la siguiente ejecución.
+
+## 🔥 Nuevo: Protocolo de Enjambre Multi-Agente
+
+**Colabora a escala.** El enjambre permite múltiples agentes especialistas trabajando coordinados.
+
+### 🪐 Arquitectura: Patrón Router-Worker
+
+```mermaid
+graph TD
+  User[Tarea del Usuario] --> Router[🧭 Agente Router]
+  Router --> Coder[💻 Agente Coder]
+  Router --> Reviewer[🔍 Agente Reviewer]
+  Router --> Researcher[📚 Agente Researcher]
+  Coder --> Router
+  Reviewer --> Router
+  Researcher --> Router
+  Router --> Result[📊 Resultado Sintetizado]
+```
+
+**Agentes Especialistas:**
+- **Router**: Analiza, delega y sintetiza.
+- **Coder**: Escribe código limpio y documentado.
+- **Reviewer**: Revisa calidad, seguridad y buenas prácticas.
+- **Researcher**: Investiga y reúne información.
+
+### 🚀 Uso
+
+**Demo interactiva:**
+```bash
+python -m src.swarm_demo
+```
+
+**En tu código:**
+```python
+from src.swarm import SwarmOrchestrator
+
+swarm = SwarmOrchestrator()
+resultado = swarm.execute("Construye una calculadora y revísala por seguridad")
+print(resultado)
+```
+
+**Salida de ejemplo:**
+```
+🧭 [Router] Analizando tarea...
+📤 [Router → Coder] Construir calculadora
+💻 [Coder] Creando implementación...
+✅ [Coder] ¡Listo!
+📤 [Router → Reviewer] Revisar seguridad
+🔍 [Reviewer] Analizando código...
+✅ [Reviewer] Revisión completa
+🎉 ¡Tarea completada!
+```
 
 ## 👥 Colaboradores
 
@@ -197,10 +388,13 @@ Un agradecimiento especial a los miembros de la comunidad que han contribuido a 
 
 **¿Quieres contribuir?** ¡Revisa nuestra página de [Issues](https://github.com/study8677/antigravity-workspace-template/issues)!
 
-## 💡 Llamada a Ideas: Protocolo Swarm
+## ⭐ Star History
 
-¡Valoramos las **ideas** tanto como el código!
-Actualmente estamos ideando la arquitectura para la **Fase 6: Swarm Multi-Agente**. Si proporcionas una sugerencia arquitectónica sólida o un diseño detallado que sea adoptado, **serás añadido a nuestro README como Colaborador**.
+[![Star History Chart](https://api.star-history.com/svg?repos=study8677/antigravity-workspace-template&type=Date)](https://star-history.com/#study8677/antigravity-workspace-template&Date)
 
-No dudes en compartir tus pensamientos en los [Issues](https://github.com/study8677/antigravity-workspace-template/issues), incluso si no tienes tiempo para escribir la implementación.
+## 💡 Llamada a Ideas: Núcleo Empresarial
+
+Valoramos las **ideas** tanto como el código. El foco ahora es la **Fase 9: Núcleo Empresarial** (sandbox seguro y flujos orquestados). Si propones una arquitectura o diseño adoptable, **te añadiremos como colaborador**.
+
+Comparte tus pensamientos en los [Issues](https://github.com/study8677/antigravity-workspace-template/issues), incluso si no tienes tiempo para escribir la implementación.
 
