@@ -1,5 +1,3 @@
-import os
-
 from src.sandbox.factory import get_sandbox
 from src.sandbox.local import LocalSandbox
 from src.sandbox.docker_exec import DockerSandbox
