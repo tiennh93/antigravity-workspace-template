@@ -41,7 +41,22 @@
 
 ## ⚡ 快速开始
 
-### 自动安装（推荐）
+### 选项 A: pip install（推荐）
+
+```bash
+pip install antigravity-agent
+antigravity init my-project
+cd my-project
+```
+
+### 选项 B: 克隆模板
+
+```bash
+git clone https://github.com/study8677/antigravity-workspace-template.git my-project
+cd my-project
+```
+
+### 自动安装（完整环境配置）
 
 **Linux / macOS：**
 ```bash
@@ -76,7 +91,7 @@ install.bat
 python src/agent.py
 ```
 
-### 手动安装
+### 手动安装（完整步骤）
 
 ```bash
 # 1. 克隆模板
